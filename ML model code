@@ -1,0 +1,210 @@
+!pip install facenet-pytorch opencv-python-headless imutils scikit-learn albumentations
+
+from google.colab import drive
+drive.mount('/content/drive')
+
+
+!pip uninstall -y pillow
+!pip install pillow==10.2.0  # Known stable version
+
+
+import os
+import cv2
+import numpy as np
+from PIL import Image
+from tqdm import tqdm
+import pickle
+import random
+
+from facenet_pytorch import MTCNN, InceptionResnetV1
+from sklearn.preprocessing import LabelEncoder, Normalizer
+from sklearn.svm import SVC
+import albumentations as A
+
+
+!pip uninstall -y albumentations
+!pip install albumentations==1.3.1
+
+import random
+import numpy as np
+from PIL import Image
+from albumentations import Compose, OneOf, MotionBlur, Cutout, CoarseDropout
+
+# Helmet/glasses-like simulation
+occlusion_transform = OneOf([
+    Cutout(num_holes=1, max_h_size=40, max_w_size=40, fill_value=0, p=1.0),
+    CoarseDropout(max_holes=1, max_height=50, max_width=50, fill_value=0, p=1.0),
+    MotionBlur(blur_limit=5, p=1.0)
+], p=1.0)
+
+def apply_occlusion(image):
+    image_np = np.array(image)
+    augmented = occlusion_transform(image=image_np)
+    return Image.fromarray(augmented['image'])
+
+
+img = Image.open("/content/drive/MyDrive/Test.jpg").convert("RGB")
+img_occluded = apply_occlusion(img)
+img_occluded.show()
+
+
+import os
+
+
+from facenet_pytorch import MTCNN, InceptionResnetV1
+
+
+import pickle
+from PIL import Image
+
+
+import numpy as np
+from facenet_pytorch import MTCNN, InceptionResnetV1
+
+
+from albumentations import OneOf, Cutout, CoarseDropout, MotionBlur
+
+
+dataset_path = '/content/drive/MyDrive/face_data'
+output_path = '/content/drive/MyDrive/output'
+os.makedirs(output_path, exist_ok=True)
+
+mtcnn = MTCNN(image_size=160, margin=20, keep_all=False)
+resnet = InceptionResnetV1(pretrained='vggface2').eval()
+
+known_embeddings = []
+known_names = []
+
+for person in os.listdir(dataset_path):
+    person_folder = os.path.join(dataset_path, person)
+    if not os.path.isdir(person_folder):
+        continue
+
+    for image_name in os.listdir(person_folder):
+        img_path = os.path.join(person_folder, image_name)
+        try:
+            img = Image.open(img_path).convert('RGB')
+            # Generate both normal and occluded versions
+            for variant in [img, apply_occlusion(img)]:
+                face = mtcnn(variant)
+                if face is not None:
+                    embedding = resnet(face.unsqueeze(0)).detach().numpy()
+                    known_embeddings.append(embedding.flatten())
+                    known_names.append(person)
+        except Exception as e:
+            print(f"Skipped {img_path}: {e}")
+
+# Save embeddings
+with open(os.path.join(output_path, "embeddings_facenet.pickle"), "wb") as f:
+    pickle.dump({"embeddings": known_embeddings, "names": known_names}, f)
+print("[INFO] Embeddings saved.")
+
+
+from sklearn.preprocessing import Normalizer, LabelEncoder
+from sklearn.svm import SVC
+
+
+with open(os.path.join(output_path, "embeddings_facenet.pickle"), "rb") as f:
+    data = pickle.load(f)
+
+normalizer = Normalizer(norm="l2")
+embeddings = normalizer.transform(data["embeddings"])
+
+le = LabelEncoder()
+labels = le.fit_transform(data["names"])
+
+recognizer = SVC(C=1.0, kernel="linear", probability=True)
+recognizer.fit(embeddings, labels)
+
+# Save model
+with open(os.path.join(output_path, "recognizer_facenet.pickle"), "wb") as f:
+    pickle.dump(recognizer, f)
+with open(os.path.join(output_path, "le_facenet.pickle"), "wb") as f:
+    pickle.dump(le, f)
+with open(os.path.join(output_path, "model_combined.pickle"), "wb") as f:
+    pickle.dump({"recognizer": recognizer, "label_encoder": le}, f)
+
+print("[INFO] Model trained and saved.")
+
+
+import os
+
+print(os.path.exists("Test.jpg"))
+
+
+from google.colab import files
+from PIL import Image
+import cv2
+import numpy as np
+import pickle
+import os
+from facenet_pytorch import MTCNN, InceptionResnetV1
+from sklearn.preprocessing import Normalizer
+from IPython.display import Image as IPImage, display
+
+# === Load models ===
+mtcnn = MTCNN(image_size=160, margin=20, keep_all=True)
+resnet = InceptionResnetV1(pretrained='vggface2').eval()
+
+# === Load recognizer and label encoder ===
+model_path = "/content/drive/MyDrive/output/model_combined.pickle"
+with open(model_path, "rb") as f:
+    model = pickle.load(f)
+recognizer = model["recognizer"]
+le = model["label_encoder"]
+
+# === Upload image ===
+uploaded = files.upload()
+if not uploaded:
+    raise Exception("No file uploaded!")
+
+# Get the first uploaded image path
+uploaded_filename = next(iter(uploaded))
+img = Image.open(uploaded_filename).convert('RGB')
+img_cv2 = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+
+# === Face Detection & Recognition ===
+faces = mtcnn(img)
+
+if faces is not None and len(faces) > 0:
+    for i, face in enumerate(faces):
+        embedding = resnet(face.unsqueeze(0)).detach().numpy()
+        embedding = Normalizer(norm='l2').transform(embedding)
+        probs = recognizer.predict_proba(embedding)[0]
+        j = np.argmax(probs)
+        name = le.classes_[j]
+        confidence = probs[j]
+
+        # Draw label
+        text = f"{name} ({confidence:.2f})"
+        cv2.putText(img_cv2, text, (10, 30 + i*40), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+else:
+    cv2.putText(img_cv2, "No face detected", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+
+# === Save and show result ===
+output_path = "/content/output_result.jpg"
+cv2.imwrite(output_path, img_cv2)
+display(IPImage(output_path))
+
+import os
+import pickle
+from google.colab import files
+
+# === Define model and label encoder (already trained) ===
+# recognizer and le should already be defined from your training steps
+# Just combine them again and save
+
+combined_model = {
+    "recognizer": recognizer,
+    "label_encoder": le
+}
+
+# === Save as 'piyush_model.pkl' ===
+output_path = "/content/piyush_model.pkl"
+with open(output_path, "wb") as f:
+    pickle.dump(combined_model, f)
+
+print(f"[INFO] Model saved as {output_path}")
+
+# === Trigger download to your system ===
+files.download(output_path)
