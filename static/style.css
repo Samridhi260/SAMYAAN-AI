@@ -1,0 +1,183 @@
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #ffffff;
+  color: #111;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background-color: #fff;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+}
+
+.navbar h1 {
+  font-size: 24px;
+  color: #111;
+}
+
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 600;
+}
+
+.hero {
+  text-align: center;
+  padding: 80px 20px 40px;
+  background: white;
+  color: #111;
+}
+
+.highlighted {
+  font-size: 2.8rem;
+  margin-bottom: 10px;
+}
+
+.stroke {
+  color: black;
+  text-decoration: underline;
+  text-decoration-thickness: 4px;
+  text-underline-offset: 6px;
+  font-weight: 700;
+}
+
+.tagline {
+  font-size: 18px;
+  margin: 10px 0 20px;
+}
+
+.subtext {
+  font-size: 16px;
+  margin-bottom: 30px;
+}
+
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.custom-file-upload {
+  border: 2px dashed #ccc;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #fff;
+  color: #333;
+  font-weight: 600;
+}
+
+#file-upload {
+  display: none;
+}
+
+.btn {
+  background-color:#0056b3; ;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #0056b3;
+}
+
+.webcam-section {
+  margin-top: 20px;
+}
+
+.or {
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.prediction-result {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.prediction-result img {
+  max-width: 300px;
+  margin: 10px 0;
+}
+
+.section {
+  padding: 60px 20px;
+  text-align: center;
+  background: #f8f8f8;
+}
+
+.steps div {
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+footer {
+  background: #eee;
+  padding: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}
+
+.stat-grid {
+  display: flex;
+  justify-content: space-around;
+  padding: 30px 10px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.stat-grid div {
+  text-align: center;
+}
+
+.how-it-works-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  margin-top: 30px;
+}
+
+.how-it-works-grid div {
+  background-color: #f2f2f2;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: left;
+}
+
+.stroke {
+  position: relative;
+  color: #6c47ff; /* Same purple as in screenshot */
+  font-weight: 800;
+  display: inline-block;
+  z-index: 1;
+}
+
+.stroke::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  background: url('https://cdn.jsdelivr.net/gh/stevenlei/underline-svg/rough-underline.svg') no-repeat center;
+  background-size: contain;
+  z-index: -1;
+}
