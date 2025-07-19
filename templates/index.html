@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SAMYAAN-AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+ <!-- Navbar -->
+<nav class="navbar">
+  <div class="logo">
+    <a href="/">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Samyaan AI Logo" height="140" width="auto">
+    </a>
+  </div>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/add">Add Person</a></li>
+      <li><a href="#howitworks">How It Works</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1 class="highlighted"><span class="stroke">Unlock</span> the Power of Facial Recognition</h1>
+    <p class="tagline">One look is all it takes</p>
+    <p class="subtext">Upload a face image or use your webcam to identify a person in real time using AI.</p>
+
+    <!-- Upload Form -->
+    <form class="upload-form" action="/recognize" method="POST" enctype="multipart/form-data">
+      <label for="file-upload" class="custom-file-upload">Choose File</label>
+      <input id="file-upload" type="file" name="image" accept="image/*" required>
+      <button class="btn" type="submit">Upload & Identify</button>
+    </form>
+
+    <div class="webcam-section">
+      <p class="or">Or Use Webcam</p>
+      <a href="/live" class="btn">Open Live Video</a>
+    </div>
+
+    {% if result_img %}
+    <div class="prediction-result">
+      <h3>Prediction Result:</h3>
+      <img src="{{ url_for('static', filename=result_img) }}" alt="Result Image">
+      <p><strong>{{ name }}</strong></p>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- How It Works -->
+  <section class="section" id="howitworks">
+    <h2>How It Works</h2>
+    <div class="how-it-works-grid">
+      <div>
+        <strong>1. Upload or Capture</strong>
+        <p>Use your webcam or upload an image of a person you want to identify.</p>
+      </div>
+      <div>
+        <strong>2. Face Detection</strong>
+        <p>We use MTCNN for detecting faces, even with helmets or scarves.</p>
+      </div>
+      <div>
+        <strong>3. Embedding + Prediction</strong>
+        <p>FaceNet converts the face into an embedding, and a trained SVM identifies the person.</p>
+      </div>
+      <div>
+        <strong>4. Result Displayed</strong>
+        <p>You’ll immediately see the result below the image — with the identified name.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="section" id="about">
+    <h2>About SAMYAAN-AI</h2>
+    <p>SAMYAAN-AI is a modern facial recognition system that combines AI accuracy with a user-friendly interface. Powered by MTCNN, FaceNet and SVM, it ensures secure and real-time identification.</p>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="section" id="faq">
+    <h2>FAQ</h2>
+    <p>Coming soon: Answers to common questions about using our platform.</p>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="section" id="contact">
+    <h2>Contact</h2>
+    <p>Email: jhasamyush1@gmail.com</p>
+    <p>Location: Kolkata, India</p>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 SAMYAAN-AI. All rights reserved.</p>
+  </footer>
+</body>
+</html>
