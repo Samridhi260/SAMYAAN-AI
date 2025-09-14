@@ -1,4 +1,4 @@
-# Face-Recognition-and-Classification-System
+# SAMYAAN - AI
 
 #Installing libraries and dependencies
 
